@@ -89,11 +89,11 @@ class ChatGPTBot(Bot, OpenAIImage):
                 reply = Reply(ReplyType.ERROR, reply_content["content"])
             elif reply_content["completion_tokens"] > 0:
                 self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
-                
+
                 pattern = r"https://mmbiz\.qpic\.cn/\S+"  # 正则表达式模式，用于匹配 https://mmbiz.qpic.cn/ 开头的完整 URL 链接
                 match = re.search(pattern, reply_content["content"])  # 在 reply_content["content"] 中搜索匹配的文本
                 if match:
-                   retstring = match.group(1)  # 提取括号中的 URL 地址
+                   retstring = match.group()  # 提取匹配的完整 URL 地址
                    reply = Reply(ReplyType.IMAGE_URL, retstring)
                 else:
                    reply = Reply(ReplyType.TEXT, reply_content["content"])
