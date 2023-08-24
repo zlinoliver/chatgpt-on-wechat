@@ -23,9 +23,13 @@ class ChatGPTBot(Bot, OpenAIImage):
     def __init__(self):
         super().__init__()
         # set the default api_key
-        openai.api_key = conf().get("open_ai_api_key")
-        if conf().get("open_ai_api_base"):
-            openai.api_base = conf().get("open_ai_api_base")
+        # openai.api_key = conf().get("open_ai_api_key")
+        # if conf().get("open_ai_api_base"):
+        #     openai.api_base = conf().get("open_ai_api_base")
+            
+        openai.api_key = conf().get("fastgpt_api_key")        
+        openai.api_base = conf().get("fastgpt_api_base")
+                        
         proxy = conf().get("proxy")
         if proxy:
             openai.proxy = proxy
@@ -47,6 +51,12 @@ class ChatGPTBot(Bot, OpenAIImage):
     def reply(self, query, context=None):
         # acquire reply content
         if context.type == ContextType.TEXT:
+            
+            # Update OpenAI Keys
+            openai.api_key = conf().get("fastgpt_api_key")        
+            openai.api_base = conf().get("fastgpt_api_base")
+            logger.info("[Yoda] create text apikey={}".format(openai.api_key))
+                        
             logger.info("[CHATGPT] query={}".format(query))
 
             session_id = context["session_id"]
@@ -89,7 +99,7 @@ class ChatGPTBot(Bot, OpenAIImage):
                 reply = Reply(ReplyType.ERROR, reply_content["content"])
             elif reply_content["completion_tokens"] > 0:
                 self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
-
+                
                 pattern = r"https://mmbiz\.qpic\.cn/\S+"  # 正则表达式模式，用于匹配 https://mmbiz.qpic.cn/ 开头的完整 URL 链接
                 match = re.search(pattern, reply_content["content"])  # 在 reply_content["content"] 中搜索匹配的文本
                 if match:
@@ -103,6 +113,10 @@ class ChatGPTBot(Bot, OpenAIImage):
             return reply
 
         elif context.type == ContextType.IMAGE_CREATE:
+            logger.info("[Yoda] create image apikey={}".format(openai.api_key))
+            openai.api_key = conf().get("open_ai_api_key")        
+            openai.api_base = conf().get("open_ai_api_base")
+        
             ok, retstring = self.create_img(query, 0)
             reply = None
             if ok:
@@ -128,7 +142,11 @@ class ChatGPTBot(Bot, OpenAIImage):
             # if api_key == None, the default openai.api_key will be used
             if args is None:
                 args = self.args
-            response = openai.ChatCompletion.create(api_key=api_key, messages=session.messages, **args)
+            # response = openai.ChatCompletion.create(api_key=api_key, messages=session.messages, **args)
+            logger.info("[Yoda] apikey1={}".format(api_key))
+            logger.info("[Yoda] apikey2={}".format(openai.api_key))
+
+            response = openai.ChatCompletion.create(api_key=api_key or openai.api_key, messages=session.messages, **args)
             # logger.debug("[CHATGPT] response={}".format(response))
             # logger.info("[ChatGPT] reply={}, total_tokens={}".format(response.choices[0]['message']['content'], response["usage"]["total_tokens"]))
             return {

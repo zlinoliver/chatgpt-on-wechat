@@ -1,5 +1,8 @@
 {
+  "fastgpt_api_key": "",
+  "fastgpt_api_base": "",
   "open_ai_api_key": "YOUR API KEY",
+  "open_ai_api_base": "https://fastgpt.run/api/openapi/v1",
   "model": "gpt-3.5-turbo",
   "channel_type": "wx",
   "proxy": "",
