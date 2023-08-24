@@ -2,7 +2,7 @@
 # docs: https://link-ai.tech/platform/link-app/wechat
 
 import time
-
+import re
 import requests
 
 from bot.bot import Bot
@@ -92,7 +92,14 @@ class LinkAIBot(Bot, OpenAIImage):
                 total_tokens = response["usage"]["total_tokens"]
                 logger.info(f"[LINKAI] reply={reply_content}, total_tokens={total_tokens}")
                 self.sessions.session_reply(reply_content, session_id, total_tokens)
-                return Reply(ReplyType.TEXT, reply_content)
+
+                pattern = r"https://mmbiz\.qpic\.cn/\S+"  # 正则表达式模式，用于匹配 https://mmbiz.qpic.cn/ 开头的完整 URL 链接
+                match = re.search(pattern, reply_content)  # 在 reply_content["content"] 中搜索匹配的文本
+                if match:
+                   retstring = match.group()  # 提取匹配的完整 URL 地址
+                   return Reply(ReplyType.IMAGE_URL, retstring)
+                else:
+                   return Reply(ReplyType.TEXT, reply_content)
 
             else:
                 response = res.json()
